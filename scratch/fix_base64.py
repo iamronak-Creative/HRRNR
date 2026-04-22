@@ -9,7 +9,7 @@ def fix_html():
         wf247_b64 = f.read().strip()
 
     print("Reading HTML file...")
-    with open('certificate-generator.html', 'r') as f:
+    with open('index.html', 'r') as f:
         content = f.read()
 
     # Define the full script block
@@ -177,7 +177,7 @@ def fix_html():
     new_content = re.sub(script_pattern, lambda m: new_script, content, flags=re.DOTALL)
 
     print("Writing updated HTML...")
-    with open('certificate-generator.html', 'w') as f:
+    with open('index.html', 'w') as f:
         f.write(new_content)
     print("Done.")
 
