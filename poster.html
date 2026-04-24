@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio | Welcome Poster Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#1a1a1a; --bg:#f4f7f6; --card-bg:#fff; --wf-blue:#1e73be; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Montserrat',sans-serif; background:var(--bg); color:var(--primary); display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:40px 20px; }
+        .container { max-width:1400px; width:100%; display:grid; grid-template-columns:420px 1fr; gap:40px; background:var(--card-bg); padding:40px; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,.05); }
+        @media(max-width:1100px){ .container{ grid-template-columns:1fr; } }
+        .controls { display:flex; flex-direction:column; gap:18px; max-height:85vh; overflow-y:auto; padding-right:15px; }
+        .controls::-webkit-scrollbar{width:5px;} .controls::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px;}
+        .group-box { background:#f9f9f9; padding:20px; border-radius:16px; border:1px solid #eee; }
+        .btn-toggle { display:flex; gap:5px; background:#eee; padding:4px; border-radius:10px; margin-top:8px; }
+        .toggle-btn { flex:1; padding:10px; border:none; background:transparent; border-radius:7px; cursor:pointer; font-weight:600; font-size:.85rem; transition:.2s; }
+        .toggle-btn.active { background:white; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+        .brand-btn { min-height:52px; display:flex; align-items:center; justify-content:center; padding:8px 12px; }
+        .brand-btn img { max-width:100%; max-height:28px; width:auto; height:auto; object-fit:contain; filter:brightness(0) saturate(0); pointer-events:none; }
+        .brand-btn#b-CP img { max-height:24px; }
+        .input-group { display:flex; flex-direction:column; gap:6px; }
+        label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#888; }
+        input,select { padding:12px; border:1.5px solid #eee; border-radius:10px; font-size:.9rem; font-family:inherit; }
+        input:focus { outline:none; border-color:var(--primary); }
+        .photo-upload { border:2px dashed #ccc; padding:20px; text-align:center; border-radius:12px; cursor:pointer; transition:.3s; }
+        .photo-upload:hover,.photo-upload.dragover { border-color:var(--wf-blue); background:#f0f7ff; }
+        .slider-row { display:flex; align-items:center; gap:10px; margin-bottom:5px; }
+        .slider-row label { width:80px; margin-bottom:0; }
+        input[type="range"] { flex:1; accent-color:var(--primary); }
+        .filter-list { display:flex; gap:10px; overflow-x:auto; padding:10px 0; margin-top:5px; }
+        .filter-list::-webkit-scrollbar{height:4px;} .filter-list::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px;}
+        .filter-item { flex:0 0 76px; text-align:center; cursor:pointer; transition:.2s; border:none; background:transparent; padding:0; font:inherit; color:inherit; }
+        .filter-item:hover { transform:translateY(-2px); }
+        .filter-item.active .filter-thumb { border-color:var(--wf-blue); box-shadow:0 4px 10px rgba(0,0,0,.1); }
+        .filter-thumb { width:76px; height:76px; background:#c8c8c8; border-radius:12px; border:3px solid transparent; overflow:hidden; margin-bottom:4px; position:relative; }
+        .filter-demo { width:100%; height:100%; background:linear-gradient(160deg,#f4d4c4 0%,#c97b63 22%,#6b8cbc 48%,#2c3e50 78%,#1a1a1a 100%); background-size:cover; background-position:center top; }
+        .filter-item span { font-size:9px; font-weight:600; color:#666; display:block; line-height:1.2; }
+        .preview-box { position:relative; background:#e5e5e5; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; aspect-ratio:3120/1755; border:4px solid white; box-shadow:0 10px 30px rgba(0,0,0,.1); }
+        .preview-panel { display:flex; flex-direction:column; gap:14px; }
+        canvas { max-width:100%; max-height:100%; object-fit:contain; }
+        .action-row { display:flex; gap:12px; }
+        .download-btn,.reset-btn { flex:1; padding:16px; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; }
+        .download-btn { background:var(--primary); color:white; }
+        .reset-btn { background:#eef1f4; color:#25313d; border:1px solid #d7dde4; }
+        .hidden { display:none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="btn-toggle">
+                <button class="toggle-btn brand-btn active" id="b-CP" onclick="setBrand('CP')" aria-label="Commerce Pundit">
+                    <img src="https://www.commercepundit.com/wp-content/uploads/2022/10/commercepundit.svg" alt="Commerce Pundit">
+                </button>
+                <button class="toggle-btn brand-btn" id="b-WF247" onclick="setBrand('WF247')" aria-label="Workforce 247">
+                    <img src="https://www.workforce247.com/wp-content/uploads/2024/02/logo.svg" alt="Workforce 247">
+                </button>
+            </div>
+            <div class="input-group"><label>Full Name</label><input type="text" id="userName" placeholder="Employee Name" oninput="debounceDraw()"></div>
+            <div class="input-group"><label>Designation</label><input type="text" id="userDesig" placeholder="e.g. Account Executive" oninput="debounceDraw()"></div>
+            <div id="dept-group" class="input-group"><label>Department</label><input type="text" id="userDept" placeholder="e.g. Development" oninput="debounceDraw()"></div>
+            <div class="group-box" style="margin-bottom:0;">
+                <label>Employee Photo</label>
+                <div class="photo-upload" id="photoUpload" onclick="document.getElementById('fileInput').click()" style="margin-top:8px;">
+                    <span id="uploadStatus">Click or Drag Photo Here</span>
+                    <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFile(event)">
+                </div>
+                <label style="margin-top:15px;display:block;">Adjust Photo</label>
+                <div class="slider-row"><label>Scale</label><input type="range" id="pScale" min="0.1" max="3" step="0.01" value="1" oninput="updateAdj()"></div>
+                <label style="margin-top:15px;display:block;">Brightness &amp; Contrast</label>
+                <div class="slider-row"><label>Bright</label><input type="range" id="pBright" min="0.5" max="2" step="0.01" value="1" oninput="updateAdj()"></div>
+                <div class="slider-row"><label>Contrast</label><input type="range" id="pCont" min="0.5" max="2" step="0.01" value="1" oninput="updateAdj()"></div>
+                <label style="margin-top:15px;display:block;">Preset filters</label>
+                <p style="font-size:.7rem;color:#999;margin:4px 0 0;line-height:1.35;">Tap a thumbnail — previews use a built-in sample until you upload a photo.</p>
+                <div class="filter-list" id="filterList" role="listbox" aria-label="Photo preset filters"></div>
+            </div>
+        </div>
+        <div class="preview-panel">
+            <div class="preview-box" id="previewArea">
+                <div id="loading" style="position:absolute;background:white;padding:20px;border-radius:10px;z-index:10;">Loading Templates...</div>
+                <canvas id="mainCanvas" width="3120" height="1755"></canvas>
+            </div>
+            <div class="action-row" id="posterActions">
+                <button class="reset-btn" type="button" onclick="resetPoster()">Reset</button>
+                <button class="download-btn" type="button" onclick="download()">Download Poster</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const loading = document.getElementById('loading');
+        let brand = 'CP';
+        let userPhoto = null;
+        let isDragOver = false;
+        let adj = { scale:1, x:0, y:0, bright:1, cont:1, preset:'' };
+        const FILTER_PRESETS = [
+            {label:'Original',filter:''},{label:'B&W',filter:'grayscale(100%)'},{label:'Sepia',filter:'sepia(65%)'},
+            {label:'Vintage',filter:'sepia(40%) saturate(85%) contrast(1.08)'},{label:'Warm',filter:'sepia(22%) saturate(1.2) hue-rotate(-8deg)'},
+            {label:'Cool',filter:'hue-rotate(12deg) saturate(1.12) brightness(1.02)'},{label:'Vivid',filter:'saturate(1.85) contrast(1.08)'},
+            {label:'Soft',filter:'brightness(1.08) contrast(0.88) saturate(0.92)'},{label:'Dramatic',filter:'contrast(1.38) brightness(0.9)'},
+            {label:'Noir',filter:'grayscale(1) contrast(1.28) brightness(0.94)'},{label:'Faded',filter:'brightness(1.05) saturate(0.62) contrast(0.9)'},
+            {label:'Golden',filter:'sepia(32%) saturate(1.25) brightness(1.06)'},{label:'Chrome',filter:'hue-rotate(195deg) saturate(0.72) brightness(0.96)'},
+            {label:'Pop',filter:'saturate(2) contrast(1.12) brightness(1.02)'},{label:'Matte',filter:'contrast(0.92) brightness(1.04) saturate(0.88)'},
+            {label:'Sunset',filter:'sepia(28%) saturate(1.45) hue-rotate(-18deg)'}
+        ];
+        function escapeAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+        function buildFilterThumbs(){
+            const list=document.getElementById('filterList'); if(!list)return;
+            list.innerHTML=FILTER_PRESETS.map((p,i)=>{
+                const tf=p.filter===''?'none':p.filter, ac=i===0?' active':'';
+                return '<button type="button" class="filter-item'+ac+'" data-preset="'+escapeAttr(p.filter)+'" role="option" aria-selected="'+(i===0?'true':'false')+'"><div class="filter-thumb" style="filter:'+tf+'"><div class="filter-demo"></div></div><span>'+escapeAttr(p.label)+'</span></button>';
+            }).join('');
+            list.querySelectorAll('.filter-item').forEach(btn=>{btn.addEventListener('click',()=>{setPreset(btn.getAttribute('data-preset')||'');});});
+        }
+        const assets = { CP_Welcome:new Image(), WF247_Welcome:new Image(), CP_Sample:new Image(), WF247_Sample:new Image(), Placeholder:new Image() };
+        let loadedCount=0; const totalAssets=5;
+        Object.entries(assets).forEach(([key,img])=>{
+            if(location.protocol!=='file:') img.crossOrigin="anonymous";
+            img.onload=()=>{ loadedCount++; if(loadedCount===totalAssets){ loading.style.display='none'; userPhoto=assets.Placeholder; document.querySelectorAll('#filterList .filter-demo').forEach(el=>{el.style.backgroundImage='url("Images/Placeholder.jpg")';}); applyDefaultFilter(); debounceDraw(); }};
+            img.onerror=()=>{console.error("Asset failed:",key);};
+        });
+        assets.CP_Welcome.src='Images/CP-Welcome-Backgorund.png';
+        assets.WF247_Welcome.src='Images/WF247-Welcomposter-Backgorund.png';
+        assets.CP_Sample.src='Images/CP-Welcome-Sample.png';
+        assets.WF247_Sample.src='Images/WF247-Welcomposter-Sample.png';
+        assets.Placeholder.src='Images/Placeholder.jpg';
+
+        function applyDefaultFilter(){ if(brand==='CP'){setPreset('grayscale(100%)');}else{setPreset('');} }
+        function setBrand(b){
+            brand=b;
+            document.querySelectorAll('#b-CP,#b-WF247').forEach(btn=>btn.classList.toggle('active',btn.id==='b-'+b));
+            document.getElementById('dept-group').classList.toggle('hidden',b!=='CP');
+            applyDefaultFilter(); debounceDraw();
+        }
+        function loadPhotoFile(file){
+            if(!file)return; const reader=new FileReader();
+            reader.onload=(ev)=>{ const img=new Image(); img.onload=()=>{ userPhoto=img; document.getElementById('uploadStatus').innerText='Photo Ready'; const u=ev.target.result.replace(/\\/g,'\\\\').replace(/"/g,'\\"'); document.querySelectorAll('#filterList .filter-demo').forEach(el=>{el.style.backgroundImage='url("'+u+'")';}); debounceDraw(); }; img.src=ev.target.result; };
+            reader.readAsDataURL(file);
+        }
+        function handleFile(e){loadPhotoFile(e.target.files[0]);}
+        function setupPhotoUpload(){
+            const upload=document.getElementById('photoUpload'),input=document.getElementById('fileInput'); if(!upload||!input)return;
+            ['dragenter','dragover'].forEach(t=>{upload.addEventListener(t,e=>{e.preventDefault();e.stopPropagation();upload.classList.add('dragover');});});
+            ['dragleave','dragend','drop'].forEach(t=>{upload.addEventListener(t,e=>{e.preventDefault();e.stopPropagation();upload.classList.remove('dragover');});});
+            upload.addEventListener('drop',e=>{const file=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(!file||!file.type.startsWith('image/'))return;loadPhotoFile(file);try{const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;}catch(err){}});
+        }
+        function setPreset(p){
+            adj.preset=p||'';
+            document.querySelectorAll('#filterList .filter-item').forEach(item=>{const v=item.getAttribute('data-preset')||'';const m=v===adj.preset;item.classList.toggle('active',m);item.setAttribute('aria-selected',m?'true':'false');});
+            debounceDraw();
+        }
+        function updateAdj(){ adj.scale=parseFloat(document.getElementById('pScale').value); adj.bright=parseFloat(document.getElementById('pBright').value); adj.cont=parseFloat(document.getElementById('pCont').value); debounceDraw(); }
+        function resetPoster(){
+            userPhoto=null; adj={scale:1,x:0,y:0,bright:1,cont:1,preset:''};
+            document.getElementById('fileInput').value=''; document.getElementById('uploadStatus').innerText='Click or Drag Photo Here';
+            document.getElementById('userName').value=''; document.getElementById('userDesig').value=''; document.getElementById('userDept').value='';
+            document.getElementById('pScale').value='1'; document.getElementById('pBright').value='1'; document.getElementById('pCont').value='1';
+            document.querySelectorAll('#filterList .filter-demo').forEach(el=>{el.style.backgroundImage='';}); applyDefaultFilter(); debounceDraw();
+        }
+        let timeout; function debounceDraw(){clearTimeout(timeout);timeout=setTimeout(draw,30);}
+        function draw(){ if(loadedCount<totalAssets)return; ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; ctx.clearRect(0,0,canvas.width,canvas.height); drawWelcome(); }
+
+        const WELCOME_REF={w:3120,h:1755};
+        const WELCOME_PHOTO={
+            WF247:{kind:'rect',x:1152,y:550,w:816,h:900,corner:30,baseScale:1.08,baseX:0,baseY:12},
+            CP:{kind:'scallop',cx:1578,cy:1025,r:380,bulge:50,lobes:10,baseScale:1.16,baseX:0,baseY:0}
+        };
+        const WELCOME_PILL={WF247:{x:1188,y:1360,w:747,h:146,radius:72}};
+        function welcomeScale(){return{sx:canvas.width/WELCOME_REF.w,sy:canvas.height/WELCOME_REF.h,u:Math.min(canvas.width/WELCOME_REF.w,canvas.height/WELCOME_REF.h)};}
+        function scaleRect(box,sx,sy){return{x:box.x*sx,y:box.y*sy,w:box.w*sx,h:box.h*sy};}
+        function drawImageCoverInBox(ctx,img,box,scale,panX,panY){
+            const ir=img.width/img.height,br=box.w/box.h; let tw,th;
+            if(ir>br){th=box.h*scale;tw=th*ir;}else{tw=box.w*scale;th=tw/ir;}
+            const cx=box.x+box.w/2+panX,cy=box.y+box.h/2+panY;
+            ctx.drawImage(img,cx-tw/2,cy-th/2,tw,th);
+        }
+        function addRoundRectPath(ctx,x,y,w,h,radius){
+            const r=Math.min(radius,w/2,h/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+        }
+        function addScallopedPath(ctx,cx,cy,r,lobes,bulge){
+            const twoPi=Math.PI*2,start=-Math.PI/2; ctx.beginPath();
+            for(let i=0;i<lobes;i++){const a0=start+(i/lobes)*twoPi,a1=start+((i+1)/lobes)*twoPi,am=(a0+a1)/2; const x0=cx+Math.cos(a0)*r,y0=cy+Math.sin(a0)*r,xm=cx+Math.cos(am)*(r+bulge),ym=cy+Math.sin(am)*(r+bulge),x1=cx+Math.cos(a1)*r,y1=cy+Math.sin(a1)*r; if(i===0)ctx.moveTo(x0,y0); ctx.quadraticCurveTo(xm,ym,x1,y1);}
+            ctx.closePath();
+        }
+        function drawWelcome(){
+            const name=(document.getElementById('userName').value||"FULL NAME").toUpperCase();
+            const desig=document.getElementById('userDesig').value||"Designation";
+            const dept=(document.getElementById('userDept').value||"Department").toUpperCase();
+            ctx.drawImage(assets[brand+'_Welcome'],0,0,canvas.width,canvas.height);
+            const photoToDraw=userPhoto||assets[brand+'_Sample'];
+            if(photoToDraw){
+                const{sx,sy,u}=welcomeScale(); const filterParts=[];
+                if(adj.preset)filterParts.push(adj.preset);
+                filterParts.push('brightness('+adj.bright+')','contrast('+adj.cont+')');
+                if(brand==='WF247'){
+                    const spec=WELCOME_PHOTO.WF247,box=scaleRect({x:spec.x,y:spec.y,w:spec.w,h:spec.h},sx,sy),rr=spec.corner*u;
+                    const scale=adj.scale*(spec.baseScale||1),panX=adj.x+(spec.baseX||0)*u,panY=adj.y+(spec.baseY||0)*u;
+                    ctx.save();addRoundRectPath(ctx,box.x,box.y,box.w,box.h,rr);ctx.clip();ctx.filter=filterParts.join(' ');drawImageCoverInBox(ctx,photoToDraw,box,scale,panX,panY);ctx.restore();
+                    ctx.save();ctx.strokeStyle='#67d6e9';ctx.lineWidth=10*u;addRoundRectPath(ctx,box.x,box.y,box.w,box.h,rr);ctx.stroke();ctx.restore();
+                    const pill=scaleRect(WELCOME_PILL.WF247,sx,sy),pr=WELCOME_PILL.WF247.radius*u;
+                    ctx.save();ctx.fillStyle='#ffffff';ctx.strokeStyle='#2b7de9';ctx.lineWidth=6*u;addRoundRectPath(ctx,pill.x,pill.y,pill.w,pill.h,pr);ctx.fill();ctx.stroke();ctx.restore();
+                }else{
+                    const spec=WELCOME_PHOTO.CP,cx2=spec.cx*sx,cy2=spec.cy*sy,r=spec.r*u,bulge=spec.bulge*u,outerR=r+bulge;
+                    const scale=adj.scale*(spec.baseScale||1),panX=adj.x+(spec.baseX||0)*u,panY=adj.y+(spec.baseY||0)*u;
+                    const cover={x:cx2-outerR,y:cy2-outerR,w:outerR*2,h:outerR*2};
+                    ctx.save();addScallopedPath(ctx,cx2,cy2,r,spec.lobes,bulge);ctx.clip();ctx.filter=filterParts.join(' ');drawImageCoverInBox(ctx,photoToDraw,cover,scale,panX,panY);ctx.restore();
+                    ctx.save();ctx.strokeStyle='#ff5a58';ctx.lineWidth=10*u;addScallopedPath(ctx,cx2,cy2,r,spec.lobes,bulge);ctx.stroke();ctx.restore();
+                }
+            }
+            ctx.textAlign='center';
+            if(brand==='WF247'){
+                ctx.fillStyle="#2b3f54";ctx.font="700 54px Montserrat";ctx.fillText(name,canvas.width/2,1452);
+                ctx.fillStyle="#ffffff";ctx.font="500 50px Montserrat";ctx.fillText(desig,canvas.width/2,1600);
+            }else{
+                ctx.fillStyle="#ff5a58";ctx.font="700 68px Montserrat";ctx.fillText(name,canvas.width/2,1538);
+                ctx.fillStyle="#000000";ctx.font="700 46px Montserrat";ctx.fillText(dept,canvas.width/2,1612);
+                ctx.font="500 38px Montserrat";ctx.fillText(desig,canvas.width/2,1682);
+            }
+            if(isDragOver){
+                ctx.save();ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='#2b7de9';ctx.lineWidth=12;ctx.setLineDash([40,25]);
+                if(brand==='WF247'){const spec=WELCOME_PHOTO.WF247,{u}=welcomeScale();addRoundRectPath(ctx,spec.x,spec.y,spec.w,spec.h,spec.corner*u);}
+                else{const spec=WELCOME_PHOTO.CP,{sx,sy,u}=welcomeScale();addScallopedPath(ctx,spec.cx*sx,spec.cy*sy,spec.r*u,spec.lobes,spec.bulge*u);}
+                ctx.stroke();ctx.fillStyle='#2b7de9';ctx.font='bold 80px Montserrat';ctx.textAlign='center';ctx.fillText('DROP PHOTO HERE',canvas.width/2,canvas.height/2+300);ctx.restore();
+            }
+        }
+        function download(){
+            try{
+                const rawName=document.getElementById('userName').value.trim()||'Untitled';
+                const safeName=rawName.replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'_');
+                const link=document.createElement('a');
+                link.download=`${brand}-Welcome-${safeName}.png`;
+                link.href=canvas.toDataURL('image/png');
+                link.style.display='none';document.body.appendChild(link);link.click();document.body.removeChild(link);
+            }catch(e){console.error('Download failed:',e);alert('Unable to generate download. Please use http://localhost to enable downloads.');}
+        }
+        function setupCanvasInteractions(){
+            let isDragging=false,lastX,lastY;
+            function getCC(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)};}
+            function isOver(c){if(brand==='WF247'){const s=WELCOME_PHOTO.WF247;return c.x>=s.x&&c.x<=s.x+s.w&&c.y>=s.y&&c.y<=s.y+s.h;}else{const s=WELCOME_PHOTO.CP,dx=c.x-s.cx,dy=c.y-s.cy;return Math.sqrt(dx*dx+dy*dy)<=s.r+s.bulge;}}
+            canvas.addEventListener('dragover',e=>{e.preventDefault();canvas.style.cursor='copy';if(!isDragOver){isDragOver=true;debounceDraw();}});
+            canvas.addEventListener('dragleave',()=>{canvas.style.cursor='default';if(isDragOver){isDragOver=false;debounceDraw();}});
+            canvas.addEventListener('drop',e=>{e.preventDefault();canvas.style.cursor='default';isDragOver=false;debounceDraw();const file=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(file&&file.type.startsWith('image/'))loadPhotoFile(file);});
+            canvas.addEventListener('mousedown',e=>{if(!userPhoto)return;if(!isOver(getCC(e)))return;isDragging=true;lastX=e.clientX;lastY=e.clientY;canvas.style.cursor='grabbing';});
+            canvas.addEventListener('mousemove',e=>{if(isDragging)return;if(!userPhoto){canvas.style.cursor='default';return;}canvas.style.cursor=isOver(getCC(e))?'grab':'default';});
+            window.addEventListener('mousemove',e=>{if(!isDragging)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;const r=canvas.getBoundingClientRect();adj.x+=dx*(canvas.width/r.width);adj.y+=dy*(canvas.height/r.height);debounceDraw();});
+            window.addEventListener('mouseup',()=>{isDragging=false;canvas.style.cursor='default';});
+        }
+        buildFilterThumbs(); setupPhotoUpload(); setupCanvasInteractions();
+    </script>
+</body>
+</html>

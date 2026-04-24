@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio | Certificate Generator</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&family=Lora:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --accent: #d4af37;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --navy: #002d5b;
+            --wf-blue: #1e73be;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 40px;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+
+        .controls::-webkit-scrollbar { width: 5px; }
+        .controls::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+        .group-box {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #eee;
+        }
+
+        .btn-toggle {
+            display: flex; gap: 5px; background: #eee; padding: 4px; border-radius: 10px; margin-top: 8px;
+        }
+
+        .toggle-btn {
+            flex: 1; padding: 10px; border: none; background: transparent; border-radius: 7px;
+            cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.2s;
+        }
+
+        .toggle-btn.active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .brand-btn {
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+        }
+        .brand-btn img {
+            max-width: 100%;
+            max-height: 28px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            filter: brightness(0) saturate(0);
+            pointer-events: none;
+        }
+        .brand-btn#b-CP img { max-height: 24px; }
+
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+
+        label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+
+        input, select { padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: inherit; }
+
+        input:focus { outline: none; border-color: var(--primary); }
+
+        .preview-box {
+            position: relative; background: #e5e5e5; border-radius: 16px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            aspect-ratio: 4250 / 3005; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .preview-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .download-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: var(--primary); color: white;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="controls">
+            <div class="btn-toggle">
+                <button class="toggle-btn brand-btn active" id="b-CP" onclick="setBrand('CP')" aria-label="Commerce Pundit">
+                    <img src="https://www.commercepundit.com/wp-content/uploads/2022/10/commercepundit.svg" alt="Commerce Pundit">
+                </button>
+                <button class="toggle-btn brand-btn" id="b-WF247" onclick="setBrand('WF247')" aria-label="Workforce 247">
+                    <img src="https://www.workforce247.com/wp-content/uploads/2024/02/logo.svg" alt="Workforce 247">
+                </button>
+            </div>
+
+            <!-- Content Inputs -->
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="userName" placeholder="Employee Name" oninput="debounceDraw()">
+            </div>
+
+            <div class="input-group">
+                <label>Designation</label>
+                <input type="text" id="userDesig" placeholder="e.g. Account Executive" oninput="debounceDraw()">
+            </div>
+
+            <div class="input-group">
+                <label>Issuing Date</label>
+                <input type="text" id="certDate" placeholder="30/06/2025" oninput="debounceDraw()">
+            </div>
+
+            <div class="action-row" style="margin-top: 10px;">
+                <button class="download-btn" type="button" onclick="download()" style="width:100%;">Download Certificate</button>
+            </div>
+
+        </div>
+
+        <div class="preview-panel">
+            <div class="preview-box" id="previewArea">
+                <div id="loading" style="position:absolute; background:white; padding: 20px; border-radius: 10px; z-index: 10;">Loading Templates...</div>
+                <canvas id="mainCanvas" width="4250" height="3005"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const loading = document.getElementById('loading');
+
+        let brand = 'CP';
+
+        const assets = {
+            CP_Cert: new Image(),
+            WF247_Cert: new Image()
+        };
+
+        let loadedCount = 0;
+        const totalAssets = 2;
+
+        Object.entries(assets).forEach(([key, img]) => {
+            if (location.protocol !== 'file:') img.crossOrigin = "anonymous";
+            img.onload = () => {
+                loadedCount++;
+                if (loadedCount === totalAssets) {
+                    loading.style.display = 'none';
+                    debounceDraw();
+                }
+            };
+            img.onerror = () => { console.error("Asset failed:", key); };
+        });
+
+        assets.CP_Cert.src = 'Images/CP-2.png';
+        assets.WF247_Cert.src = 'Images/WF247-2.png';
+
+        function setBrand(b) {
+            brand = b;
+            document.querySelectorAll('#b-CP, #b-WF247').forEach(btn => btn.classList.toggle('active', btn.id === 'b-'+b));
+            debounceDraw();
+        }
+
+        let timeout;
+        function debounceDraw() {
+            clearTimeout(timeout);
+            timeout = setTimeout(draw, 30);
+        }
+
+        function draw() {
+            if (loadedCount < totalAssets) return;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCert();
+        }
+
+        function drawCert() {
+            const name = (document.getElementById('userName').value || "Recipient Name").toUpperCase();
+            const desig = document.getElementById('userDesig').value || "Designation";
+            const date = document.getElementById('certDate').value || "";
+            const scale = 4.16;
+
+            ctx.drawImage(assets[brand + '_Cert'], 0, 0, canvas.width, canvas.height);
+            ctx.textAlign = 'center';
+
+            if (brand === 'WF247') {
+                ctx.font = `italic 700 ${48 * scale}px "Playfair Display"`; ctx.fillStyle = '#1D3557';
+                ctx.fillText(name, 2700, 1800);
+                ctx.font = `400 ${22 * scale}px Montserrat`; ctx.fillStyle = '#333333';
+                ctx.fillText(desig, 2700, 1920);
+                if (date) { ctx.textAlign = 'left'; ctx.font = `400 ${16 * scale}px Montserrat`; ctx.fillText(date, 1950, 2650); }
+            } else {
+                ctx.font = `700 ${44 * scale}px "Lora"`; ctx.fillStyle = '#000000';
+                ctx.fillText(name, 3200, 1300);
+                ctx.font = `400 ${20 * scale}px Montserrat`; ctx.fillText(desig, 3200, 1430);
+                if (date) { ctx.font = `600 ${16 * scale}px Montserrat`; ctx.fillText(date, 2800, 2560); }
+            }
+        }
+
+        function download() {
+            try {
+                const rawName = document.getElementById('userName').value.trim() || 'Untitled';
+                const safeName = rawName.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_');
+                const link = document.createElement('a');
+                link.download = `${brand}-Certificate-${safeName}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (e) {
+                console.error('Download failed:', e);
+                alert('Unable to generate download. Please check console for details.');
+            }
+        }
+
+        document.getElementById('certDate').value = new Date().toLocaleDateString('en-GB');
+    </script>
+</body>
+
+</html>
