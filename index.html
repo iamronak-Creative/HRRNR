@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate Generator | CP & WF247</title>
+    <title>Studio | HR Asset Generator</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&family=Lora:ital,wght@0,700;1,700&display=swap"
         rel="stylesheet">
@@ -12,11 +12,11 @@
         :root {
             --primary: #1a1a1a;
             --accent: #d4af37;
-            --bg: #f8f9fa;
+            --bg: #f4f7f6;
             --card-bg: #ffffff;
             --text: #333333;
-            --navy: #000080;
-            --dark-gray: #333333;
+            --navy: #002d5b;
+            --wf-blue: #1e73be;
         }
 
         * {
@@ -37,20 +37,18 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             width: 100%;
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: 420px 1fr;
             gap: 40px;
             background: var(--card-bg);
             padding: 40px;
             border-radius: 24px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
         }
 
-        @media (max-width: 1000px) {
+        @media (max-width: 1100px) {
             .container {
                 grid-template-columns: 1fr;
             }
@@ -62,334 +60,813 @@
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
             letter-spacing: -1px;
             margin-bottom: 8px;
-            background: linear-gradient(45deg, #1a1a1a, #4a4a4a);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        p.subtitle {
-            color: #666;
-            font-size: 1rem;
         }
 
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 18px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding-right: 15px;
         }
 
-        .brand-selector {
-            display: flex;
-            gap: 12px;
-            background: #f0f0f0;
-            padding: 6px;
-            border-radius: 12px;
-            position: relative;
+        .controls::-webkit-scrollbar { width: 5px; }
+        .controls::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+        .group-box {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #eee;
         }
 
+        .btn-toggle {
+            display: flex; gap: 5px; background: #eee; padding: 4px; border-radius: 10px; margin-top: 8px;
+        }
+
+        .toggle-btn {
+            flex: 1; padding: 10px; border: none; background: transparent; border-radius: 7px;
+            cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.2s;
+        }
+
+        .toggle-btn.active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .brand-btn {
-            flex: 1;
-            padding: 12px;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+        }
+        .brand-btn img {
+            max-width: 100%;
+            max-height: 28px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            filter: brightness(0) saturate(0);
+            pointer-events: none;
+        }
+        .brand-btn#b-CP img { max-height: 24px; }
+
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+
+        label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+
+        input, select { padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: inherit; }
+
+        input:focus { outline: none; border-color: var(--primary); }
+
+        .photo-upload {
+            border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s;
+        }
+
+        .photo-upload:hover { border-color: var(--wf-blue); background: #f0f7ff; }
+        .photo-upload.dragover { border-color: var(--wf-blue); background: #f0f7ff; }
+
+        .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .slider-row label { width: 80px; margin-bottom: 0; }
+        input[type="range"] { flex: 1; accent-color: var(--primary); }
+
+        /* Filter Thumbnails */
+        .filter-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            margin-top: 5px;
+        }
+        .filter-list::-webkit-scrollbar { height: 4px; }
+        .filter-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+        .filter-item {
+            flex: 0 0 76px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
             border: none;
             background: transparent;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            z-index: 1;
+            padding: 0;
+            font: inherit;
+            color: inherit;
+        }
+        .filter-item:hover { transform: translateY(-2px); }
+        .filter-item:focus-visible { outline: 2px solid var(--wf-blue); outline-offset: 3px; border-radius: 8px; }
+        .filter-item.active .filter-thumb { border-color: var(--wf-blue); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        .filter-thumb {
+            width: 76px;
+            height: 76px;
+            background: #c8c8c8;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            overflow: hidden;
+            margin-bottom: 4px;
+            position: relative;
+        }
+        .filter-demo {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(160deg, #f4d4c4 0%, #c97b63 22%, #6b8cbc 48%, #2c3e50 78%, #1a1a1a 100%);
+            background-size: cover;
+            background-position: center top;
+        }
+        .filter-item span { font-size: 9px; font-weight: 600; color: #666; display: block; line-height: 1.2; }
+
+        .preview-box {
+            position: relative; background: #e5e5e5; border-radius: 16px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            aspect-ratio: 4250 / 3005; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        .brand-btn.active {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .input-group {
+        .preview-panel {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 14px;
         }
 
-        label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888;
+        canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
         }
 
-        input {
+        .download-btn, .reset-btn {
+            flex: 1;
             padding: 16px;
-            border: 2px solid #eee;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--accent);
+            border: none;
+            border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
 
         .download-btn {
-            margin-top: 20px;
-            padding: 18px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            background: var(--primary); color: white;
         }
 
-        .download-btn:hover {
-            background: #333;
-            transform: translateY(-2px);
+        .reset-btn {
+            background: #eef1f4;
+            color: #25313d;
+            border: 1px solid #d7dde4;
         }
 
-        .download-btn:active {
-            transform: translateY(0);
-        }
-
-        .preview-pane {
-            position: relative;
-            background: #eee;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            aspect-ratio: 4250 / 3005;
-        }
-
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            z-index: 10;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <h1>Certificate Studio</h1>
-        <p class="subtitle">Generate high-resolution print-ready certificates</p>
-    </header>
-
     <div class="container">
         <div class="controls">
-            <div class="input-group">
-                <label>Select Brand</label>
-                <div class="brand-selector">
-                    <button class="brand-btn active" id="btn-CP" onclick="setBrand('CP')">CP (Commerce Pundit)</button>
-                    <button class="brand-btn" id="btn-WF247" onclick="setBrand('WF247')">WF247 (Workforce 247)</button>
+            <!-- Mode & Brand -->
+            <div class="group-box">
+                <label>Brand</label>
+                <div class="btn-toggle">
+                    <button class="toggle-btn brand-btn active" id="b-CP" onclick="setBrand('CP')" aria-label="Commerce Pundit">
+                        <img src="https://www.commercepundit.com/wp-content/uploads/2022/10/commercepundit.svg" alt="Commerce Pundit">
+                    </button>
+                    <button class="toggle-btn brand-btn" id="b-WF247" onclick="setBrand('WF247')" aria-label="Workforce 247">
+                        <img src="https://www.workforce247.com/wp-content/uploads/2024/02/logo.svg" alt="Workforce 247">
+                    </button>
+                </div>
+                <label style="margin-top: 15px; display: block;">Mode</label>
+                <div class="btn-toggle">
+                    <button class="toggle-btn active" id="m-cert" onclick="setMode('cert')">Certificate</button>
+                    <button class="toggle-btn" id="m-welcome" onclick="setMode('welcome')">Welcome Poster</button>
                 </div>
             </div>
 
+            <!-- Content Inputs -->
             <div class="input-group">
-                <label>Recipient Name</label>
-                <input type="text" id="userName" placeholder="Enter Full Name" oninput="debounceDraw()">
+                <label>Full Name</label>
+                <input type="text" id="userName" placeholder="Employee Name" oninput="debounceDraw()">
             </div>
 
             <div class="input-group">
-                <label>Department / Designation</label>
-                <input type="text" id="userDept" placeholder="Enter Department" oninput="debounceDraw()">
+                <label>Designation</label>
+                <input type="text" id="userDesig" placeholder="e.g. Account Executive" oninput="debounceDraw()">
             </div>
 
-            <div class="input-group">
-                <label>Date</label>
-                <input type="text" id="certDate" placeholder="e.g. 30/06/2025" oninput="debounceDraw()">
+            <div id="dept-group" class="input-group hidden">
+                <label>Department</label>
+                <input type="text" id="userDept" placeholder="e.g. Development" oninput="debounceDraw()">
             </div>
 
-            <button class="download-btn" onclick="download()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Download JPG
-            </button>
-            <p id="errorMsg"
-                style="color: #d93025; font-size: 12px; display: none; text-align: center; margin-top: 10px;">
-                Note: If images fail to load, please ensure the /Images directory exists and files are named correctly.
-            </p>
+            <div id="date-group" class="input-group">
+                <label>Issuing Date</label>
+                <input type="text" id="certDate" placeholder="30/06/2025" oninput="debounceDraw()">
+            </div>
+
+            <div id="cert-download" class="action-row" style="margin-top: 10px;">
+                <button class="download-btn" type="button" onclick="download()" style="width:100%;">Download Certificate</button>
+            </div>
+
+            <!-- Poster Specific -->
+            <div id="poster-controls" class="hidden">
+                <div class="group-box" style="margin-bottom: 0;">
+                    <label>Employee Photo</label>
+                    <div class="photo-upload" id="photoUpload" onclick="document.getElementById('fileInput').click()" style="margin-top: 8px;">
+                        <span id="uploadStatus">Click or Drag Photo Here</span>
+                        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFile(event)">
+                    </div>
+
+                    <label style="margin-top: 15px; display: block;">Adjust Photo</label>
+                    <div class="slider-row"><label>Scale</label><input type="range" id="pScale" min="0.1" max="3" step="0.01" value="1" oninput="updateAdj()"></div>
+                    
+                    <label style="margin-top: 15px; display: block;">Brightness & Contrast</label>
+                    <div class="slider-row"><label>Bright</label><input type="range" id="pBright" min="0.5" max="2" step="0.01" value="1" oninput="updateAdj()"></div>
+                    <div class="slider-row"><label>Contrast</label><input type="range" id="pCont" min="0.5" max="2" step="0.01" value="1" oninput="updateAdj()"></div>
+                    
+                    <label style="margin-top: 15px; display: block;">Preset filters</label>
+                    <p style="font-size:0.7rem;color:#999;margin:4px 0 0;line-height:1.35;">Tap a thumbnail — previews use a built-in sample until you upload a photo.</p>
+                    <div class="filter-list" id="filterList" role="listbox" aria-label="Photo preset filters"></div>
+                </div>
+            </div>
+
         </div>
 
-        <div class="preview-pane">
-            <div id="loading" class="loading-overlay">Initializing Assets...</div>
-            <canvas id="certCanvas" width="4250" height="3005"></canvas>
+        <div class="preview-panel">
+            <div class="preview-box" id="previewArea">
+                <div id="loading" style="position:absolute; background:white; padding: 20px; border-radius: 10px; z-index: 10;">Loading Templates...</div>
+                <canvas id="mainCanvas" width="4250" height="3005"></canvas>
+            </div>
+            <div class="action-row hidden" id="posterActions">
+                <button class="reset-btn" type="button" onclick="resetPoster()">Reset</button>
+                <button class="download-btn" type="button" onclick="download()">Download Result</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('certCanvas');
+        const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         const loading = document.getElementById('loading');
+        const previewArea = document.getElementById('previewArea');
 
-        let currentBrand = 'CP';
-        const images = {
-            CP: new Image(),
-            WF247: new Image()
+        let mode = 'cert';
+        let brand = 'CP';
+        let userPhoto = null;
+        let isDragOver = false;
+        let adj = { scale: 1, x: 0, y: 0, bright: 1, cont: 1, preset: '' };
+
+        const FILTER_PRESETS = [
+            { label: 'Original', filter: '' },
+            { label: 'B&W', filter: 'grayscale(100%)' },
+            { label: 'Sepia', filter: 'sepia(65%)' },
+            { label: 'Vintage', filter: 'sepia(40%) saturate(85%) contrast(1.08)' },
+            { label: 'Warm', filter: 'sepia(22%) saturate(1.2) hue-rotate(-8deg)' },
+            { label: 'Cool', filter: 'hue-rotate(12deg) saturate(1.12) brightness(1.02)' },
+            { label: 'Vivid', filter: 'saturate(1.85) contrast(1.08)' },
+            { label: 'Soft', filter: 'brightness(1.08) contrast(0.88) saturate(0.92)' },
+            { label: 'Dramatic', filter: 'contrast(1.38) brightness(0.9)' },
+            { label: 'Noir', filter: 'grayscale(1) contrast(1.28) brightness(0.94)' },
+            { label: 'Faded', filter: 'brightness(1.05) saturate(0.62) contrast(0.9)' },
+            { label: 'Golden', filter: 'sepia(32%) saturate(1.25) brightness(1.06)' },
+            { label: 'Chrome', filter: 'hue-rotate(195deg) saturate(0.72) brightness(0.96)' },
+            { label: 'Pop', filter: 'saturate(2) contrast(1.12) brightness(1.02)' },
+            { label: 'Matte', filter: 'contrast(0.92) brightness(1.04) saturate(0.88)' },
+            { label: 'Sunset', filter: 'sepia(28%) saturate(1.45) hue-rotate(-18deg)' }
+        ];
+
+        function escapeAttr(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        }
+
+        function buildFilterThumbs() {
+            const list = document.getElementById('filterList');
+            if (!list) return;
+            list.innerHTML = FILTER_PRESETS.map((p, i) => {
+                const thumbFilter = p.filter === '' ? 'none' : p.filter;
+                const active = i === 0 ? ' active' : '';
+                return (
+                    '<button type="button" class="filter-item' + active + '" data-preset="' + escapeAttr(p.filter) + '" role="option" aria-selected="' + (i === 0 ? 'true' : 'false') + '">' +
+                    '<div class="filter-thumb" style="filter: ' + thumbFilter + '"><div class="filter-demo"></div></div>' +
+                    '<span>' + escapeAttr(p.label) + '</span></button>'
+                );
+            }).join('');
+            list.querySelectorAll('.filter-item').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const v = btn.getAttribute('data-preset') || '';
+                    setPreset(v);
+                });
+            });
+        }
+
+        const assets = {
+            CP_Cert: new Image(),
+            WF247_Cert: new Image(),
+            CP_Welcome: new Image(),
+            WF247_Welcome: new Image(),
+            CP_Sample: new Image(),
+            WF247_Sample: new Image(),
+            Placeholder: new Image()
         };
 
-        let imagesLoaded = 0;
-        const totalImages = 2;
+        let loadedCount = 0;
 
-        // Set Image Sources (Using external files for performance)
-        images.CP.src = 'Images/CP-2.png';
-        images.WF247.src = 'Images/WF247-2.png';
+        Object.entries(assets).forEach(([key, img]) => {
+            if (location.protocol !== 'file:') img.crossOrigin = "anonymous"; 
+            img.onload = () => { 
+                loadedCount++; 
+                if (loadedCount === 7) { 
+                    loading.style.display = 'none'; 
+                    userPhoto = assets.Placeholder;
+                    document.querySelectorAll('#filterList .filter-demo').forEach((el) => {
+                        el.style.backgroundImage = 'url("Images/Placeholder.jpg")';
+                    });
+                    updateCanvasSize(); 
+                    debounceDraw(); 
+                } 
+            };
+            img.onerror = () => { console.error("Asset failed:", key); };
+        });
 
-        images.CP.onload = () => onImageLoad('CP');
-        images.CP.onerror = () => onImageError('CP');
-        images.WF247.onload = () => onImageLoad('WF247');
-        images.WF247.onerror = () => onImageError('WF247');
+        assets.CP_Cert.src = 'Images/CP-2.png';
+        assets.WF247_Cert.src = 'Images/WF247-2.png';
+        assets.CP_Welcome.src = 'Images/CP-Welcome-Backgorund.png';
+        assets.WF247_Welcome.src = 'Images/WF247-Welcomposter-Backgorund.png';
+        assets.CP_Sample.src = 'Images/CP-Welcome-Sample.png';
+        assets.WF247_Sample.src = 'Images/WF247-Welcomposter-Sample.png';
+        assets.Placeholder.src = 'Images/Placeholder.jpg';
 
-        function onImageLoad(brand) {
-            imagesLoaded++;
-            console.log(`Loaded ${brand} (${imagesLoaded}/${totalImages})`);
-            if (imagesLoaded === totalImages) {
-                loading.style.display = 'none';
-                debounceDraw();
+        function applyDefaultFilter() {
+            if (mode === 'welcome' && brand === 'CP') {
+                setPreset('grayscale(100%)');
+            } else {
+                setPreset('');
             }
         }
 
-        function onImageError(brand) {
-            console.error(`Error loading ${brand}`);
-            document.getElementById('errorMsg').style.display = 'block';
-            loading.style.color = 'red';
-            loading.innerText = `Error loading ${brand} template.`;
-        }
-
-        function setBrand(brand) {
-            currentBrand = brand;
-            document.querySelectorAll('.brand-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btn-${brand}`).classList.add('active');
+        function setMode(m) {
+            mode = m;
+            document.querySelectorAll('#m-cert, #m-welcome').forEach(b => b.classList.toggle('active', b.id === 'm-'+m));
+            document.getElementById('date-group').classList.toggle('hidden', m === 'welcome');
+            document.getElementById('cert-download').classList.toggle('hidden', m === 'welcome');
+            document.getElementById('poster-controls').classList.toggle('hidden', m === 'cert');
+            document.getElementById('dept-group').classList.toggle('hidden', !(m === 'welcome' && brand === 'CP'));
+            document.getElementById('posterActions').classList.toggle('hidden', m === 'cert');
+            applyDefaultFilter();
+            updateCanvasSize();
             debounceDraw();
         }
 
-        let drawTimeout;
+        function setBrand(b) {
+            brand = b;
+            document.querySelectorAll('#b-CP, #b-WF247').forEach(btn => btn.classList.toggle('active', btn.id === 'b-'+b));
+            document.getElementById('dept-group').classList.toggle('hidden', !(mode === 'welcome' && b === 'CP'));
+            applyDefaultFilter();
+            updateCanvasSize();
+            debounceDraw();
+        }
+
+        function updateCanvasSize() {
+            if (mode === 'cert') {
+                canvas.width = 4250; canvas.height = 3005;
+                previewArea.style.aspectRatio = "4250 / 3005";
+            } else {
+                canvas.width = 3120; canvas.height = 1755;
+                previewArea.style.aspectRatio = "3120 / 1755";
+            }
+        }
+
+        function loadPhotoFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    userPhoto = img;
+                    document.getElementById('uploadStatus').innerText = 'Photo Ready';
+                    const u = ev.target.result.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                    document.querySelectorAll('#filterList .filter-demo').forEach((el) => {
+                        el.style.backgroundImage = 'url("' + u + '")';
+                    });
+                    debounceDraw();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleFile(e) {
+            loadPhotoFile(e.target.files[0]);
+        }
+
+        function setupPhotoUpload() {
+            const upload = document.getElementById('photoUpload');
+            const input = document.getElementById('fileInput');
+            if (!upload || !input) return;
+
+            ['dragenter', 'dragover'].forEach((type) => {
+                upload.addEventListener(type, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    upload.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'dragend', 'drop'].forEach((type) => {
+                upload.addEventListener(type, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    upload.classList.remove('dragover');
+                });
+            });
+
+            upload.addEventListener('drop', (e) => {
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (!file || !file.type.startsWith('image/')) return;
+                loadPhotoFile(file);
+                try {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                } catch (err) {}
+            });
+        }
+
+        function setPreset(p) {
+            adj.preset = p || '';
+            document.querySelectorAll('#filterList .filter-item').forEach((item) => {
+                const v = item.getAttribute('data-preset') || '';
+                const match = v === adj.preset;
+                item.classList.toggle('active', match);
+                item.setAttribute('aria-selected', match ? 'true' : 'false');
+            });
+            debounceDraw();
+        }
+
+        function updateAdj() {
+            adj.scale = parseFloat(document.getElementById('pScale').value);
+            adj.bright = parseFloat(document.getElementById('pBright').value);
+            adj.cont = parseFloat(document.getElementById('pCont').value);
+            debounceDraw();
+        }
+
+        function resetPoster() {
+            userPhoto = null;
+            adj = { scale: 1, x: 0, y: 0, bright: 1, cont: 1, preset: '' };
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadStatus').innerText = 'Click or Drag Photo Here';
+            document.getElementById('userName').value = '';
+            document.getElementById('userDesig').value = '';
+            document.getElementById('userDept').value = '';
+            document.getElementById('pScale').value = '1';
+            document.getElementById('pBright').value = '1';
+            document.getElementById('pCont').value = '1';
+            document.querySelectorAll('#filterList .filter-demo').forEach((el) => {
+                el.style.backgroundImage = '';
+            });
+            setPreset('');
+            debounceDraw();
+        }
+
+        let timeout;
         function debounceDraw() {
-            clearTimeout(drawTimeout);
-            drawTimeout = setTimeout(draw, 100);
+            clearTimeout(timeout);
+            timeout = setTimeout(draw, 30);
         }
 
         function draw() {
-            if (imagesLoaded < totalImages) return;
-
-            const name = (document.getElementById("userName").value || "RECIPIENT NAME").toUpperCase();
-            const dept = document.getElementById('userDept').value || "DEPARTMENT NAME";
-            const date = document.getElementById('certDate').value || "";
-
+            if (loadedCount < 7) return;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(images[currentBrand], 0, 0);
+            if (mode === 'cert') drawCert(); else drawWelcome();
+        }
 
-            ctx.fillStyle = "black";
-            ctx.textAlign = "center";
+        function drawCert() {
+            const name = (document.getElementById('userName').value || "Recipient Name").toUpperCase();
+            const desig = document.getElementById('userDesig').value || "Designation";
+            const date = document.getElementById('certDate').value || "";
+            const scale = 4.16;
 
-            const ptScale = 4.16; // 300 DPI scale factor (approx)
+            ctx.drawImage(assets[brand + '_Cert'], 0, 0, canvas.width, canvas.height);
+            ctx.textAlign = 'center';
 
-            if (currentBrand === 'WF247') {
-                // WF247 Template Specific Layout
-                const centerX = 2700; // Adjusted for WF247 visual center
-
-                // Name: Playfair Display (Italic Bold)
-                ctx.font = `italic 700 ${48 * ptScale}px "Playfair Display", serif`;
-                ctx.fillStyle = '#1D3557';
-                ctx.fillText(name, centerX, 1800);
-
-                // Designation: Montserrat (Regular)
-                ctx.font = `400 ${22 * ptScale}px "Montserrat", sans-serif`;
-                ctx.fillStyle = '#333333';
-                ctx.fillText(dept, centerX, 1920);
-
-                // Date: Left aligned above the line
-                if (date) {
-                    ctx.textAlign = 'left';
-                    ctx.font = `400 ${16 * ptScale}px "Montserrat", sans-serif`;
-                    ctx.fillStyle = '#111111';
-                    ctx.fillText(date, 1950, 2650);
-                }
+            if (brand === 'WF247') {
+                ctx.font = `italic 700 ${48 * scale}px "Playfair Display"`; ctx.fillStyle = '#1D3557';
+                ctx.fillText(name, 2700, 1800);
+                ctx.font = `400 ${22 * scale}px Montserrat`; ctx.fillStyle = '#333333';
+                ctx.fillText(desig, 2700, 1920);
+                if (date) { ctx.textAlign = 'left'; ctx.font = `400 ${16 * scale}px Montserrat`; ctx.fillText(date, 1950, 2650); }
             } else {
-                // CP Template Specific Layout
-                const centerX = 3200;
+                ctx.font = `700 ${44 * scale}px "Lora"`; ctx.fillStyle = '#000000';
+                ctx.fillText(name, 3200, 1300);
+                ctx.font = `400 ${20 * scale}px Montserrat`; ctx.fillText(desig, 3200, 1430);
+                if (date) { ctx.font = `600 ${16 * scale}px Montserrat`; ctx.fillText(date, 2800, 2560); }
+            }
+        }
 
-                // Name: Bold black serif
-                ctx.font = `700 ${44 * ptScale}px "Lora", serif`;
-                ctx.fillStyle = '#000000';
-                ctx.fillText(name, centerX, 1300);
+        /** Welcome templates are 3120×1755; photo slots calibrated to template placeholder art. */
+        const WELCOME_REF = { w: 3120, h: 1755 };
+        const WELCOME_PHOTO = {
+            WF247: { kind: 'rect', x: 1152, y: 550, w: 816, h: 900, corner: 30, baseScale: 1.08, baseX: 0, baseY: 12 },
+            CP: { kind: 'scallop', cx: 1578, cy: 1025, r: 380, bulge: 50, lobes: 10, baseScale: 1.16, baseX: 0, baseY: 0 }
+        };
+        const WELCOME_PILL = {
+            WF247: { x: 1188, y: 1360, w: 747, h: 146, radius: 72 }
+        };
 
-                // Dept: Montserrat Regular
-                ctx.font = `400 ${20 * ptScale}px "Montserrat", sans-serif`;
-                ctx.fillStyle = '#000000';
-                ctx.fillText(dept, centerX, 1430);
+        function welcomeScale() {
+            return { sx: canvas.width / WELCOME_REF.w, sy: canvas.height / WELCOME_REF.h, u: Math.min(canvas.width / WELCOME_REF.w, canvas.height / WELCOME_REF.h) };
+        }
 
-                // Date: Center aligned above the line
-                if (date) {
-                    ctx.textAlign = 'center';
-                    ctx.font = `600 ${16 * ptScale}px "Montserrat", sans-serif`;
-                    ctx.fillStyle = '#333333';
-                    ctx.fillText(date, 2800, 2560);
+        function scaleRect(box, sx, sy) {
+            return { x: box.x * sx, y: box.y * sy, w: box.w * sx, h: box.h * sy };
+        }
+
+        /** Draw image with CSS object-fit: cover inside box; scale multiplies size (1 = fill). */
+        function drawImageCoverInBox(ctx, img, box, scale, panX, panY) {
+            const ir = img.width / img.height;
+            const br = box.w / box.h;
+            let tw, th;
+            if (ir > br) {
+                th = box.h * scale;
+                tw = th * ir;
+            } else {
+                tw = box.w * scale;
+                th = tw / ir;
+            }
+            const cx = box.x + box.w / 2 + panX;
+            const cy = box.y + box.h / 2 + panY;
+            ctx.drawImage(img, cx - tw / 2, cy - th / 2, tw, th);
+        }
+
+        function addRoundRectPath(ctx, x, y, width, height, radius) {
+            const r = Math.min(radius, width / 2, height / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + width - r, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+            ctx.lineTo(x + width, y + height - r);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+            ctx.lineTo(x + r, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function addScallopedPath(ctx, cx, cy, r, lobes, bulge) {
+            const twoPi = Math.PI * 2;
+            const start = -Math.PI / 2;
+            ctx.beginPath();
+            for (let i = 0; i < lobes; i++) {
+                const a0 = start + (i / lobes) * twoPi;
+                const a1 = start + ((i + 1) / lobes) * twoPi;
+                const am = (a0 + a1) / 2;
+                const x0 = cx + Math.cos(a0) * r;
+                const y0 = cy + Math.sin(a0) * r;
+                const xm = cx + Math.cos(am) * (r + bulge);
+                const ym = cy + Math.sin(am) * (r + bulge);
+                const x1 = cx + Math.cos(a1) * r;
+                const y1 = cy + Math.sin(a1) * r;
+                if (i === 0) ctx.moveTo(x0, y0);
+                ctx.quadraticCurveTo(xm, ym, x1, y1);
+            }
+            ctx.closePath();
+        }
+
+        function drawWelcome() {
+            const name = (document.getElementById('userName').value || "FULL NAME").toUpperCase();
+            const desig = document.getElementById('userDesig').value || "Designation";
+            const dept = (document.getElementById('userDept').value || "Department").toUpperCase();
+
+            ctx.drawImage(assets[brand + '_Welcome'], 0, 0, canvas.width, canvas.height);
+
+            const photoToDraw = userPhoto || assets[brand + '_Sample'];
+
+            if (photoToDraw) {
+                const { sx, sy, u } = welcomeScale();
+                const filterParts = [];
+                if (adj.preset) filterParts.push(adj.preset);
+                filterParts.push('brightness(' + adj.bright + ')', 'contrast(' + adj.cont + ')');
+
+                if (brand === 'WF247') {
+                    const spec = WELCOME_PHOTO.WF247;
+                    const box = scaleRect({ x: spec.x, y: spec.y, w: spec.w, h: spec.h }, sx, sy);
+                    const rr = spec.corner * u;
+                    const scale = adj.scale * (spec.baseScale || 1);
+                    const panX = adj.x + (spec.baseX || 0) * u;
+                    const panY = adj.y + (spec.baseY || 0) * u;
+
+                    ctx.save();
+                    addRoundRectPath(ctx, box.x, box.y, box.w, box.h, rr);
+                    ctx.clip();
+                    ctx.filter = filterParts.join(' ');
+                    drawImageCoverInBox(ctx, photoToDraw, box, scale, panX, panY);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.strokeStyle = '#67d6e9';
+                    ctx.lineWidth = 10 * u;
+                    addRoundRectPath(ctx, box.x, box.y, box.w, box.h, rr);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    const pill = scaleRect(WELCOME_PILL.WF247, sx, sy);
+                    const pr = WELCOME_PILL.WF247.radius * u;
+                    ctx.save();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#2b7de9';
+                    ctx.lineWidth = 6 * u;
+                    addRoundRectPath(ctx, pill.x, pill.y, pill.w, pill.h, pr);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                } else {
+                    const spec = WELCOME_PHOTO.CP;
+                    const cx = spec.cx * sx;
+                    const cy = spec.cy * sy;
+                    const r = spec.r * u;
+                    const bulge = spec.bulge * u;
+                    const outerR = r + bulge;
+                    const scale = adj.scale * (spec.baseScale || 1);
+                    const panX = adj.x + (spec.baseX || 0) * u;
+                    const panY = adj.y + (spec.baseY || 0) * u;
+                    const cover = {
+                        x: cx - outerR,
+                        y: cy - outerR,
+                        w: outerR * 2,
+                        h: outerR * 2
+                    };
+
+                    ctx.save();
+                    addScallopedPath(ctx, cx, cy, r, spec.lobes, bulge);
+                    ctx.clip();
+                    ctx.filter = filterParts.join(' ');
+                    drawImageCoverInBox(ctx, photoToDraw, cover, scale, panX, panY);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.strokeStyle = '#ff5a58';
+                    ctx.lineWidth = 10 * u;
+                    addScallopedPath(ctx, cx, cy, r, spec.lobes, bulge);
+                    ctx.stroke();
+                    ctx.restore();
+
                 }
             }
+
+            ctx.textAlign = 'center';
+            if (brand === 'WF247') {
+                ctx.fillStyle = "#2b3f54"; ctx.font = "700 54px Montserrat";
+                ctx.fillText(name, canvas.width/2, 1452);
+                ctx.fillStyle = "#ffffff"; ctx.font = "500 50px Montserrat";
+                ctx.fillText(desig, canvas.width/2, 1600);
+            } else {
+                ctx.fillStyle = "#ff5a58"; ctx.font = "700 68px Montserrat";
+                ctx.fillText(name, canvas.width/2, 1538);
+                ctx.fillStyle = "#000000"; ctx.font = "700 46px Montserrat";
+                ctx.fillText(dept, canvas.width/2, 1612);
+                ctx.font = "500 38px Montserrat";
+                ctx.fillText(desig, canvas.width/2, 1682);
+            }
+
+            if (isDragOver) {
+                ctx.save();
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#2b7de9';
+                ctx.lineWidth = 12;
+                ctx.setLineDash([40, 25]);
+                
+                if (brand === 'WF247') {
+                    const spec = WELCOME_PHOTO.WF247;
+                    const { u } = welcomeScale();
+                    addRoundRectPath(ctx, spec.x, spec.y, spec.w, spec.h, spec.corner * u);
+                } else {
+                    const spec = WELCOME_PHOTO.CP;
+                    const { sx, sy, u } = welcomeScale();
+                    addScallopedPath(ctx, spec.cx * sx, spec.cy * sy, spec.r * u, spec.lobes, spec.bulge * u);
+                }
+                ctx.stroke();
+                
+                ctx.fillStyle = '#2b7de9';
+                ctx.font = 'bold 80px Montserrat';
+                ctx.textAlign = 'center';
+                ctx.fillText('DROP PHOTO HERE', canvas.width/2, canvas.height/2 + 300);
+                ctx.restore();
+            }
         }
 
-        function download() {
-            try {
-                const name = document.getElementById('userName').value || "Certificate";
-                canvas.toBlob((blob) => {
-                    if (!blob) {
-                        alert("Could not generate image blob.");
-                        return;
-                    }
+            function download() {
+                try {
+                    const rawName = document.getElementById('userName').value.trim() || 'Untitled';
+                    const safeName = rawName.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_');
+                    const modeLabel = mode === 'cert' ? 'Certificate' : 'Welcome';
                     const link = document.createElement('a');
-                    link.download = `${currentBrand}_Certificate_${name.replace(/\s+/g, '_')}.jpg`;
-                    link.href = URL.createObjectURL(blob);
+                    link.download = `${brand}-${modeLabel}-${safeName}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    // Append to DOM to ensure click works across browsers
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
                     link.click();
-                    setTimeout(() => URL.revokeObjectURL(link.href), 10000);
-                }, 'image/jpeg', 0.95);
-            } catch (e) {
-                console.error(e);
-                alert("Download failed. This might be a cross-origin issue if not running on a server.");
+                    document.body.removeChild(link);
+                } catch (e) {
+                    console.error('Download failed:', e);
+                    alert('Unable to generate download. Please check console for details.');
+                }
             }
+
+        function setupCanvasInteractions() {
+            let isDragging = false;
+            let lastX, lastY;
+
+            function getCanvasCoords(e) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: (e.clientX - rect.left) * (canvas.width / rect.width),
+                    y: (e.clientY - rect.top) * (canvas.height / rect.height)
+                };
+            }
+
+            function isOverPhotoArea(coords) {
+                if (brand === 'WF247') {
+                    const s = WELCOME_PHOTO.WF247;
+                    return (coords.x >= s.x && coords.x <= s.x + s.w && coords.y >= s.y && coords.y <= s.y + s.h);
+                } else {
+                    const s = WELCOME_PHOTO.CP;
+                    const dx = coords.x - s.cx;
+                    const dy = coords.y - s.cy;
+                    const outerR = s.r + s.bulge;
+                    return (Math.sqrt(dx * dx + dy * dy) <= outerR);
+                }
+            }
+
+            canvas.addEventListener('dragover', (e) => {
+                if (mode !== 'welcome') return;
+                e.preventDefault();
+                canvas.style.cursor = 'copy';
+                if (!isDragOver) { isDragOver = true; debounceDraw(); }
+            });
+
+            canvas.addEventListener('dragleave', () => {
+                canvas.style.cursor = 'default';
+                if (isDragOver) { isDragOver = false; debounceDraw(); }
+            });
+
+            canvas.addEventListener('drop', (e) => {
+                if (mode !== 'welcome') return;
+                e.preventDefault();
+                canvas.style.cursor = 'default';
+                isDragOver = false;
+                debounceDraw();
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) { loadPhotoFile(file); }
+            });
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (mode !== 'welcome' || !userPhoto) return;
+                if (!isOverPhotoArea(getCanvasCoords(e))) return;
+                
+                isDragging = true;
+                lastX = e.clientX;
+                lastY = e.clientY;
+                canvas.style.cursor = 'grabbing';
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDragging) return;
+                if (mode !== 'welcome' || !userPhoto) {
+                    canvas.style.cursor = 'default';
+                    return;
+                }
+                canvas.style.cursor = isOverPhotoArea(getCanvasCoords(e)) ? 'grab' : 'default';
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - lastX;
+                const deltaY = e.clientY - lastY;
+                lastX = e.clientX;
+                lastY = e.clientY;
+
+                const rect = canvas.getBoundingClientRect();
+                const sx = canvas.width / rect.width;
+                const sy = canvas.height / rect.height;
+
+                adj.x += deltaX * sx;
+                adj.y += deltaY * sy;
+                
+                debounceDraw();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = 'default';
+            });
         }
 
-        // Set default date
-        document.getElementById("certDate").value = new Date().toLocaleDateString("en-GB");
-
-        // Ensure fonts are loaded before first draw
-        document.fonts.ready.then(() => {
-            if (imagesLoaded === totalImages) {
-                draw();
-            }
-        });
+        document.getElementById('certDate').value = new Date().toLocaleDateString('en-GB');
+        buildFilterThumbs();
+        setupPhotoUpload();
+        setupCanvasInteractions();
     </script>
 </body>
 
